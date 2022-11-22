@@ -13,7 +13,7 @@ class Profile(models.Model):
     """model for user account"""
     image = models.ImageField(upload_to='profileimages/', default='profileimages/profile-avatar.png', null=False,
                               blank=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, blank=False)
     username = models.CharField(max_length=150, null=False, blank=False)
     email = models.EmailField(max_length=100, null=False, blank=False, unique=True)
