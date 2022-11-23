@@ -3,7 +3,8 @@ from .serializers import UserRegisterSerializer, ProfileSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from .models import *
-
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer
 
 @api_view(['POST'])
 def register_user(request):
@@ -24,3 +25,8 @@ def update_profile(request, profile_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    """Token Obtain Pair View"""
+    serializer_class = MyTokenObtainPairSerializer
