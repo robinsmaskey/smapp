@@ -80,7 +80,7 @@ def add_like_to_post(request, post_id):
 
     try:
         post = Post.objects.get(id=post_id)
-        print(post)
+        # print(post)
         liked = False
         if post.likes.filter(id=profile.id).exists():
             post.likes.remove(profile)
@@ -93,3 +93,43 @@ def add_like_to_post(request, post_id):
         return Response(content, status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def update_post(request, post_id):
+#     try:
+#         post = Post.objects.get(id=post_id)
+#         user = request.user
+#         request_data = request.data
+#         print(request_data)
+#         updated_contents_list = request.data.keys()
+#         if 'title' not in updated_contents_list: request_data['title'] = post.title
+#         if 'content' not in updated_contents_list: request_data['content'] = post.content
+#         request_data['owner'] = user.profile.id
+#         print(request_data)
+#         serializer = PostCreateSerializer(instance=post, data=request_data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             content = {'message': 'post updated'}
+#         return Response(serializer.data, content)
+#     except Post.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+#     finally:
+#         content = {'message': 'failed to update the post'}
+#         return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_post(request, post_id):
+    try:
+        print(post_id)
+        post = Post.objects.get(id=post_id)
+        print(post)
+        post.delete()
+        content = {'message': 'post deleted'}
+        return Response(content, status=status.HTTP_200_OK)
+    except:
+        content = {'message': 'failed to delete the post'}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
