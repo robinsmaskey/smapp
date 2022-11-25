@@ -22,8 +22,20 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PostCreateSerailizer(serializers.ModelSerializer):
+class PostCreateSerializer(serializers.ModelSerializer):
+    """Post Create Serializer"""
     id = serializers.UUIDField(read_only=True)
+
     class Meta:
         model = Post
         fields = ['title', 'content', 'owner', 'id']
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    """Comment Create Serializer"""
+    id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['content', 'post', 'owner', 'id']
+

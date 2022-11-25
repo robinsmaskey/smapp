@@ -1,7 +1,7 @@
 from .models import Post, Comment
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializers import PostSerializer, CommentSerializer, PostCreateSerailizer
+from .serializers import PostSerializer, CommentSerializer, PostCreateSerializer, CommentCreateSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from useraccounts.serializers import ProfileSerializer
@@ -45,7 +45,7 @@ def create_post(request):
     user = request.user
     request_data = request.data
     request_data['owner'] = user.profile.id
-    serializer = PostCreateSerailizer(data=request.data)
+    serializer = PostCreateSerializer(data=request_data)
 
     if serializer.is_valid():
         serializer.save()
@@ -55,3 +55,18 @@ def create_post(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_comment(request, post_id):
+    user = request.user
+    request_data = request.data
+    request_data['owner'] = user.profile.id
+    request_data['post'] = post_id
+    serializer = CommentCreateSerializer(data=request_data)
+
+    if serializer.is_valid():
+        serializer.save()
+        content = {'comment_id': serializer.data['id']}
+        return Response(content, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
