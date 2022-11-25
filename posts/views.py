@@ -70,3 +70,26 @@ def create_comment(request, post_id):
         return Response(content, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_like_to_post(request, post_id):
+    user = request.user
+    profile = user.profile
+
+    try:
+        post = Post.objects.get(id=post_id)
+        print(post)
+        liked = False
+        if post.likes.filter(id=profile.id).exists():
+            post.likes.remove(profile)
+            liked = False
+            content = {'message': 'like reverted successfully', 'liked': liked}
+        else:
+            post.likes.add(profile)
+            liked = True
+            content = {'message': 'like added successfully', 'liked': liked}
+        return Response(content, status=status.HTTP_200_OK)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
