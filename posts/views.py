@@ -7,6 +7,7 @@ from rest_framework import status
 from useraccounts.serializers import ProfileSerializer
 from .permissions import IsOwnerOrReadOnly, has_permission_for_item
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.pagination import PageNumberPagination
 
 
 @api_view(['GET'])
@@ -14,9 +15,14 @@ from rest_framework.exceptions import PermissionDenied
 def get_all_posts(request):
 
     """querying all posts"""
+    paginator = PageNumberPagination()
+    paginator.page_size = 2
     posts = Post.objects.all().order_by('-created')
-    serializer = PostSerializer(posts, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+
+    result_page = paginator.paginate_queryset(posts, request)
+    print(result_page)
+    serializer = PostSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 @api_view(['GET'])
