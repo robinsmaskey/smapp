@@ -97,29 +97,62 @@ def add_like_to_post(request, post_id):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def update_post(request, post_id):
-#     try:
-#         post = Post.objects.get(id=post_id)
-#         user = request.user
-#         request_data = request.data
-#         print(request_data)
-#         updated_contents_list = request.data.keys()
-#         if 'title' not in updated_contents_list: request_data['title'] = post.title
-#         if 'content' not in updated_contents_list: request_data['content'] = post.content
-#         request_data['owner'] = user.profile.id
-#         print(request_data)
-#         serializer = PostCreateSerializer(instance=post, data=request_data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             content = {'message': 'post updated'}
-#         return Response(serializer.data, content)
-#     except Post.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-#     finally:
-#         content = {'message': 'failed to update the post'}
-#         return Response(content, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_post(request, post_id):
+    """update post"""
+    try:
+        post_object = Post.objects.get(id=post_id)
+        user = request.user
+        request_data = request.data
+
+        if not has_permission_for_item(request, post_object):
+            raise PermissionDenied()
+
+        request_data['owner'] = user.profile.id
+        serializer = PostCreateSerializer(instance=post_object, data=request_data)
+        if serializer.is_valid():
+            serializer.save()
+            # content = {'message': 'post updated'}
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except PermissionDenied:
+        content = {'message': PermissionDenied.default_detail}
+        return Response(content, status=PermissionDenied.status_code)
+    except Post.DoesNotExist:
+        content = {'message': 'Post Does Not Existed'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_comment(request, post_id, comment_id):
+    """update post"""
+    try:
+        comment_object = Comment.objects.get(id=comment_id)
+        user = request.user
+        request_data = request.data
+
+        if not has_permission_for_item(request, comment_object):
+            raise PermissionDenied()
+
+        request_data['owner'] = user.profile.id
+        request_data['post'] = post_id
+        serializer = CommentCreateSerializer(instance=comment_object, data=request_data)
+        if serializer.is_valid():
+            serializer.save()
+            # content = {'message': 'comment updated'}
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except PermissionDenied:
+        content = {'message': PermissionDenied.default_detail}
+        return Response(content, status=PermissionDenied.status_code)
+
+    except Post.DoesNotExist:
+        content = {'message': 'Comment Does Not Existed'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['DELETE'])
@@ -134,11 +167,15 @@ def delete_post(request, post_id):
         post.delete()
         content = {'message': 'post deleted'}
         return Response(content, status=status.HTTP_200_OK)
+
     except Post.DoesNotExist:
         content = {'message': 'Post Does Not Existed'}
         return Response(content, status=status.HTTP_404_NOT_FOUND)
+
     except PermissionDenied:
-        return Response(PermissionDenied.default_detail, PermissionDenied.status_code)
+        content = {'message': PermissionDenied.default_detail}
+        return Response(content, status=PermissionDenied.status_code)
+
     except:
         content = {'message': 'failed to delete the post'}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
