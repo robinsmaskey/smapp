@@ -23,7 +23,7 @@ def get_all_posts(request):
 @permission_classes([IsAuthenticated])
 def get_my_posts(request, profile_id):
     """querying logged in user posts"""
-    posts = Post.objects.filter(owner=profile_id)
+    posts = Post.objects.filter(owner=profile_id).order_by('-created')
     serializer = PostSerializer(posts, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -34,7 +34,7 @@ def get_post_comments(request, post_id):
     """Get Post Comments"""
     try:
         post = Post.objects.get(id=post_id)
-        comments = post.comments.all()
+        comments = post.comments.all().order_by('-created')
         serialized_comments = CommentSerializer(comments, many=True)
         return Response(serialized_comments.data, status=status.HTTP_200_OK)
     except:
