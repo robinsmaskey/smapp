@@ -81,7 +81,7 @@ pybase64==1.2.3
 pycodestyle==2.7.0
 pycparser==2.21
 Pygments==2.11.2
-PyJWT==2.1.0
+PyJWT
 pyparsing==3.0.7
 pyrsistent==0.18.1
 python-dateutil==2.8.2
